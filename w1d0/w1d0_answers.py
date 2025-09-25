@@ -25,6 +25,8 @@ if __name__ == "__main__":
 # %%
 # %%
 
+# %%
+
 from dataclasses import dataclass
 
 
@@ -45,10 +47,30 @@ def analyze_user_behavior(username: str = "karpathy") -> UserIntel:
     Returns:
         The user's name, location, email, and 5 most recently updated repos.
     """
-    # TODO: Return information about the given GitHub user
-    # 1. Make a GET request to: https://api.github.com/users/{username}
-    # 2. Extract name, location, and email from the response
-    # 3. Make another GET request to: https://api.github.com/users/{username}/repos?sort=updated&per_page=5
-    # 4. Extract repository names (limit to 5)
-    # 5. Return a UserIntel object with the gathered information
-    pass
+    # 1. Make a GET request to get user information
+    user_url = f"https://api.github.com/users/{username}"
+    user_response = requests.get(user_url)
+    user_data = user_response.json()
+
+    # 2. Extract user information (some might be None if private)
+    name = user_data.get("name")
+    location = user_data.get("location")
+    email = user_data.get("email")
+
+    # 3. Make a GET request to get user's repositories
+    repos_url = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=5"
+    repos_response = requests.get(repos_url)
+    repos_data = repos_response.json()
+
+    # 4. Extract repository names (limit to 5 most recent)
+    repo_names = [repo["name"] for repo in repos_data]
+
+    # 5. Return UserIntel object with gathered information
+    return UserIntel(username=username, name=name, location=location, email=email, repo_names=repo_names)
+
+
+# %%
+
+from w1d0_test import test_analyze_user_behavior
+
+test_analyze_user_behavior(analyze_user_behavior)
