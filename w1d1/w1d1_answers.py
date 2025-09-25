@@ -45,3 +45,88 @@ def lcg_keystream(seed: int) -> Generator[int, None, None]:
 from w1d1_test import test_lcg_keystream
 
 test_lcg_keystream(lcg_keystream)
+
+
+# %%
+# %%
+def lcg_encrypt(seed: int, plaintext: bytes) -> bytes:
+    """
+    Encrypt plaintext using the LCG keystream.
+
+    Args:
+        seed: Seed for the keystream generator
+        plaintext: The message to encrypt (as bytes)
+
+    Returns:
+        Encrypted message (as bytes)
+    """
+    # Get our keystream generator
+    keystream = lcg_keystream(seed)
+
+    # Create a list to hold our encrypted bytes
+    encrypted_bytes = []
+
+    # Process each byte of the plaintext
+    for plaintext_byte in plaintext:
+        # Get the next keystream byte
+        keystream_byte = next(keystream)
+
+        # XOR them together
+        encrypted_byte = plaintext_byte ^ keystream_byte
+
+        # Add to our result
+        encrypted_bytes.append(encrypted_byte)
+
+    # Convert list back to bytes and return
+    return bytes(encrypted_bytes)
+
+
+# Test the encryption function
+from w1d1_test import test_encrypt
+
+test_encrypt(lcg_encrypt)
+
+
+# %%
+# %%
+def lcg_decrypt(seed: int, ciphertext: bytes) -> bytes:
+    """
+    Decrypt ciphertext using the same LCG keystream.
+
+    Args:
+        seed: Same seed used for encryption
+        ciphertext: The encrypted message to decrypt
+
+    Returns:
+        Decrypted plaintext (as bytes)
+    """
+    # Get our keystream generator (same seed as encryption!)
+    keystream = lcg_keystream(seed)
+
+    # Create a list to hold our decrypted bytes
+    decrypted_bytes = []
+
+    # Process each byte of the ciphertext
+    for ciphertext_byte in ciphertext:
+        # Get the next keystream byte (same sequence as encryption)
+        keystream_byte = next(keystream)
+
+        # XOR them together (this reverses the encryption)
+        decrypted_byte = ciphertext_byte ^ keystream_byte
+
+        # Add to our result
+        decrypted_bytes.append(decrypted_byte)
+
+    # Convert list back to bytes and return
+    return bytes(decrypted_bytes)
+
+
+# Test the decryption function
+from w1d1_test import test_decrypt
+
+test_decrypt(lcg_decrypt)
+
+# Test both functions together
+from w1d1_test import test_stream_cipher
+
+test_stream_cipher(lcg_keystream, lcg_encrypt, lcg_decrypt)
